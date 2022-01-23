@@ -1,0 +1,30 @@
+{
+  "name": "ssh",
+  "version": "1.0.0",
+  "description": "ssh application by electron and java",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron --inspect=5858 ."
+  },
+  "repository": "https://github.com/970263611/ssh",
+  "author": "dahua",
+  "devDependencies": {
+    "electron": "^16.0.7",
+    "element-plus": "^1.3.0-beta.5",
+    "ssh2": "^1.5.0",
+    "vue": "^3.2.27",
+    "ws": "^8.4.2",
+    "xterm": "^4.16.0",
+    "xterm-addon-attach": "^0.6.0",
+    "xterm-addon-fit": "^0.5.0"
+  },
+  "dependencies": {
+    "electron": "^16.0.7",
+    "element-plus": "^1.3.0-beta.5",
+    "vue": "^3.2.27",
+    "ws": "^8.4.2",
+    "xterm": "^4.16.0",
+    "xterm-addon-attach": "^0.6.0",
+    "xterm-addon-fit": "^0.5.0"
+  }
+}

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../node_modules/xterm/css/xterm.css"/>
+    <style>
+        body {
+            margin: 0px 10px 0px 10px;
+            overflow: hidden;
+        }
+
+        .xterm-viewport {
+            overflow-x: hidden;
+            overflow-y: scroll;
+        }
+
+        .xterm-viewport::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="outside">
+<div id="terminal" class="xterm"></div>
+<script type="application/javascript" src="../static/terminal.js"></script>
+</body>
+</html>

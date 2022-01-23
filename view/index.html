@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../node_modules/element-plus/dist/index.css"/>
+    <style>
+        body {
+            overflow: hidden;
+        }
+
+        .fromInline {
+            padding-left: 0px !important;
+            padding-right: 0px !important;
+        }
+
+        .el-card__body {
+            padding: 15px;
+        }
+
+        .el-card {
+            margin-bottom: 10px;
+        }
+
+        .btnDiv button {
+            width: 40%;
+        }
+
+        .outside {
+            overflow-x: hidden;
+            overflow-y: scroll;
+            max-height: 315px;
+        }
+
+        .outside::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <el-row :gutter="20">
+        <el-col :span="2">
+            <div class="grid-content bg-purple"></div>
+        </el-col>
+        <el-col :span="7" class="outside">
+            <template v-for="(item) in users">
+                <el-card shadow="hover">
+                    <div @mouseover="showConnectionBtn(item.id)" @mouseout="hideConnectionBtn(item.id)"
+                         style="position: relative;text-align: center;">
+                        <span :id="item.id + 'text'">{{ item.name }}</span>
+                        <div :id="item.id" class="btnDiv"
+                             style="display: none;position: absolute;right: 0;top: -25%;">
+                            <el-button type="success" plain @click="connect(item.id)">连接</el-button>
+                            <el-button type="danger" plain @click="remove(item.id)">移除</el-button>
+                        </div>
+                    </div>
+                </el-card>
+            </template>
+        </el-col>
+        <el-col :span="1">
+            <div class="grid-content bg-purple"></div>
+        </el-col>
+        <el-col :span="12">
+            <el-form
+                    ref="inputForm"
+                    :model="form"
+                    status-icon
+                    :rules="rules"
+            >
+                <el-form-item label="名称" prop="name">
+                    <el-input v-model="form.name"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-col :span="14" class="fromInline">
+                        <el-form-item label="地址" prop="host">
+                            <el-input v-model="form.host"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="10" style="padding-left: 10px!important;" class="fromInline">
+                        <el-form-item label="端口" prop="port" :inline="true">
+                            <el-input v-model="form.port"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-form-item>
+                <el-form-item label="用户" prop="user">
+                    <el-input v-model="form.user"></el-input>
+                </el-form-item>
+                <el-form-item label="密码" prop="pass">
+                    <el-input
+                            v-model="form.pass"
+                            type="password"
+                            autocomplete="off"
+                            show-password
+                    ></el-input>
+                </el-form-item>
+                <el-form-item label="备注" style="padding-left: 10px!important;">
+                    <el-input v-model="form.remake"></el-input>
+                </el-form-item>
+                <el-form-item label="保存" style="padding-left: 10px!important;">
+                    <el-switch v-model="form.delivery"></el-switch>
+                </el-form-item>
+                <el-form-item style="padding-left: 10px">
+                    <el-button type="primary" @click="submitForm('inputForm')" :loading="loading">连接</el-button>
+                    <el-button @click="resetForm()">重置</el-button>
+                </el-form-item>
+            </el-form>
+        </el-col>
+        <el-col :span="2">
+            <div class="grid-content bg-purple"></div>
+        </el-col>
+    </el-row>
+</div>
+<script type="application/javascript" src="../node_modules/vue/dist/vue.global.js"></script>
+<script type="application/javascript" src="../node_modules/element-plus/dist/index.full.min.js"></script>
+<script>
+    const {ipcRenderer} = require('electron')
+    const vue = {
+        data() {
+            return {
+                users: [],
+                form: {
+                    name: '',
+                    host: '',
+                    port: 22,
+                    user: '',
+                    pass: '',
+                    remake: '',
+                    delivery: false,
+                },
+                loading: false,
+                rules: {
+                    name: [
+                        {required: true, message: '名称是必填项'}
+                    ],
+                    host: [
+                        {required: true, message: '地址是必填项'}
+                    ],
+                    port: [
+                        {required: true, message: '端口是必填项'},
+                        {type: 'number', message: '端口必须是数字'}
+                    ],
+                    user: [
+                        {required: true, message: '用户是必填项'}
+                    ],
+                    pass: [
+                        {required: true, message: '密码是必填项'}
+                    ]
+                }
+            }
+        },
+        created() {
+            ipcRenderer.on('sshUsers', (event, arg) => {
+                this.users = JSON.parse(arg)
+            })
+        },
+        methods: {
+            submitForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        this.loading = true
+                        this.form.id = Date.now()
+                        if (this.form.delivery) {
+                            let flag = true
+                            for (const user of this.users) {
+                                if (user.name === this.form.name) {
+                                    flag = false
+                                    this.$message.error(`${this.form.name}已经存在，请不要重复添加`)
+                                    this.loading = false
+                                    return
+                                }
+                            }
+                            if (flag) {
+                                this.ipcSend('sshInput', this.form)
+                                this.users.push(Object.assign({}, this.form))
+                            }
+                        }
+                        this.ipcSend('connect', this.form)
+                        this.loading = false
+                        this.resetForm()
+                    } else {
+                        return
+                    }
+                })
+            },
+            resetForm() {
+                this.$refs['inputForm'].resetFields()
+            },
+            showConnectionBtn(id) {
+                document.getElementById(id).style.display = "inline"
+                document.getElementById(id + 'text').style.visibility = "hidden"
+            },
+            hideConnectionBtn(id) {
+                document.getElementById(id).style.display = "none"
+                document.getElementById(id + 'text').style.visibility = "inherit"
+            },
+            ipcSend(channel, msg) {
+                ipcRenderer.send(channel, JSON.stringify(msg))
+            },
+            connect(id) {
+                for (const user of this.users) {
+                    if (user.id === id) {
+                        this.ipcSend('connect', user)
+                    }
+                }
+                this.resetForm()
+            },
+            remove(id) {
+                this.users.forEach((user, index, arr) => {
+                    if (user.id === id) {
+                        this.ipcSend('remove', id)
+                        this.users.splice(index, 1)
+                    }
+                })
+            }
+        }
+    }
+    Vue.createApp(vue).use(ElementPlus).mount('#app')
+</script>
+</body>
+</html>
