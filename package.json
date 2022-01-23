@@ -10,7 +10,7 @@
   "author": "dahua",
   "devDependencies": {
     "electron": "^16.0.7",
-    "element-plus": "^1.3.0-beta.5",
+    "element-plus": "^1.3.0-beta.7",
     "ssh2": "^1.5.0",
     "vue": "^3.2.27",
     "ws": "^8.4.2",
@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "electron": "^16.0.7",
-    "element-plus": "^1.3.0-beta.5",
+    "element-plus": "^1.3.0-beta.7",
     "vue": "^3.2.27",
     "ws": "^8.4.2",
     "xterm": "^4.16.0",
