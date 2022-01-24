@@ -28,21 +28,32 @@ function openTerminal(dom, id) {
             'instruction': e.key
         })
     })
-    fit()
+    fit(550)
 }
 
 ipcRenderer.on('terminal', (event, arg) => {
     openTerminal(document.getElementById('terminal'), arg)
-    fit()
 })
 
 ipcRenderer.on('instruction-reply', (event, arg) => {
     terminal.write(arg)
 })
 
-function fit() {
-    fitAddon.fit()
-    document.getElementsByClassName('xterm-viewport')[0].style.width = '764px'
-}
+ipcRenderer.on('resize', (event, arg) => {
+    fit(arg.height - 50)
+})
 
-window.addEventListener("resize", fit)
+function fit(height) {
+    setTimeout(function () {
+        document.getElementsByClassName('xterm-viewport')[0].style.width =
+            document.body.offsetWidth + 'px'
+        document.getElementsByClassName('terminal')[0].style.height =
+            height + 'px'
+        const canvasAry = document.getElementsByTagName('canvas')
+        for (const canvas of canvasAry) {
+            canvas.style.height = height + 'px'
+        }
+
+    }, 100)
+    fitAddon.fit()
+}

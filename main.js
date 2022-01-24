@@ -1,4 +1,4 @@
-const {app, BrowserWindow, ipcMain, Menu, nativeImage} = require('electron')
+const {app, BrowserWindow, ipcMain, Menu, dialog} = require('electron')
 const path = require('path')
 const fs = require('fs')
 const {Client} = require('ssh2')
@@ -88,6 +88,9 @@ function connect(msg) {
                     terminalWindow.webContents.send('instruction-reply', data)
                 })
             })
+        }).on('error', (e) => {
+            destroy(terminalWindow, conn)
+            dialog.showErrorBox('连接失败', e.toString())
         }).connect({
             host: msg.host,
             port: msg.port,
@@ -95,9 +98,21 @@ function connect(msg) {
             password: msg.pass
         })
     })
+
+    terminalWindow.on('resized', () => {
+        fit(terminalWindow)
+    })
+
+    terminalWindow.on('maximize', () => {
+        fit(terminalWindow)
+    })
+
+    terminalWindow.on('unmaximize', () => {
+        fit(terminalWindow)
+    })
+
     terminalWindow.on('closed', () => {
-        terminalWindow.destroy()
-        conn.destroy()
+        destroy(terminalWindow, conn)
     })
     terminalWindow.webContents.openDevTools()
 }
@@ -130,3 +145,13 @@ ipcMain.on('instruction', (event, param) => {
     const obj = connectionMap.get(param.id)
     obj.shell.write(param.instruction)
 })
+
+function fit(terminalWindow) {
+    const rectangle = terminalWindow.getNormalBounds()
+    terminalWindow.webContents.send('resize', rectangle)
+}
+
+function destroy(terminalWindow, conn) {
+    terminalWindow.destroy()
+    conn.destroy()
+}
