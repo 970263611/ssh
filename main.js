@@ -1,4 +1,4 @@
-const {app, BrowserWindow, ipcMain, Menu, dialog} = require('electron')
+const {app, BrowserWindow, ipcMain, Menu, dialog, screen} = require('electron')
 const path = require('path')
 const fs = require('fs')
 const {Client} = require('ssh2')
@@ -68,6 +68,7 @@ function connect(msg) {
         title: 'HUA-SSH',
         width: 800,
         height: 600,
+        backgroundColor: '#28313a',
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
@@ -100,15 +101,15 @@ function connect(msg) {
     })
 
     terminalWindow.on('resized', () => {
-        fit(terminalWindow)
+        fit(terminalWindow, false)
     })
 
     terminalWindow.on('maximize', () => {
-        fit(terminalWindow)
+        fit(terminalWindow, true)
     })
 
     terminalWindow.on('unmaximize', () => {
-        fit(terminalWindow)
+        fit(terminalWindow, false)
     })
 
     terminalWindow.on('closed', () => {
@@ -146,8 +147,12 @@ ipcMain.on('instruction', (event, param) => {
     obj.shell.write(param.instruction)
 })
 
-function fit(terminalWindow) {
+function fit(terminalWindow, isMax) {
     const rectangle = terminalWindow.getNormalBounds()
+    if (isMax) {
+        rectangle.height = screen.getPrimaryDisplay().workAreaSize.height
+        rectangle.isMax = true
+    }
     terminalWindow.webContents.send('resize', rectangle)
 }
 

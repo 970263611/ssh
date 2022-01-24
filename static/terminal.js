@@ -13,7 +13,7 @@ const terminal = new Terminal({
     cursorBlink: true, //光标闪烁
     theme: {
         foreground: "#7e9192", //字体
-        background: "#003303", //背景色
+        background: "#28313a", //背景色
         lineHeight: 16
     }
 })
@@ -28,7 +28,7 @@ function openTerminal(dom, id) {
             'instruction': e.key
         })
     })
-    fit(550)
+    fit(560)
 }
 
 ipcRenderer.on('terminal', (event, arg) => {
@@ -40,7 +40,13 @@ ipcRenderer.on('instruction-reply', (event, arg) => {
 })
 
 ipcRenderer.on('resize', (event, arg) => {
-    fit(arg.height - 50)
+    let height
+    if (arg.isMax) {
+        height = arg.height - 25
+    } else {
+        height = arg.height - 40
+    }
+    fit(height)
 })
 
 function fit(height) {
@@ -53,7 +59,6 @@ function fit(height) {
         for (const canvas of canvasAry) {
             canvas.style.height = height + 'px'
         }
-
+        fitAddon.fit()
     }, 100)
-    fitAddon.fit()
 }
