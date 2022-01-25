@@ -22,10 +22,11 @@ function openTerminal(dom, id) {
     terminal.open(dom)
     terminal.loadAddon(fitAddon)
     terminal.write('Welcome to use HUA-SSH\r\n')
-    terminal.onKey(e => {
+    // terminal.onKey()
+    terminal.onData(msg => {
         ipcRenderer.send('instruction', {
             id: id,
-            'instruction': e.key
+            'instruction': msg
         })
     })
     fit(560)
